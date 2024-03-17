@@ -283,11 +283,60 @@ for ii = 1 : NMT
 
 end
 
-%%
+%% Save Result
 zzz_ANN_max = max(zzz_ANN_RESULT, [], 1);
 zzz_ANN_max = movmean(zzz_ANN_max, [2, 0], 'omitnan');
 zzz_ANN_max = movmean(zzz_ANN_max, [2, 0], 'omitnan');
 
+zzz_ANN_min = min(zzz_ANN_RESULT, [], 1);
+zzz_ANN_min = movmean(zzz_ANN_min, [2, 0], 'omitnan');
+zzz_ANN_min = movmean(zzz_ANN_min, [2, 0], 'omitnan');
+
+zzz_ANN_FINAL_RESULT = mean(zzz_ANN_RESULT, 1);
+
+save([pwd '/ann_240317.mat'], ...
+    'hidden_weight', 'hidden_bias', ...
+    'output_weight', 'output_bias', ...
+    'gain_input', 'gain_output', ...
+    'offset_input', 'offset_output');
+
+zzz_ANN_RESULT = zzz_ANN_RESULT(1:z_original_size);
+radar_date_datetime = radar_date_datetime(1:z_original_size);
+radar_date_double = radar_date_double(1:z_original_size);
+zzz_bouy_Hs = zzz_bouy_Hs(1:z_original_size);
+
+radar_noise = radar_noise(1:z_original_size);
+radar_signal = radar_signal(1:z_original_size);
+radar_SNR = radar_SNR(1:z_original_size);
+radar_Pdir = radar_Pdir(1:z_original_size);
+radar_wind = radar_wind(1:z_original_size);
+zz_Tp_min = zz_Tp_min(1:z_original_size);
+
+%% Report
+figure(1);
+set(gcf, 'position', [300 300 1200 400]);
+hold off;
+
+plot(radar_date_datetime, zzz_ANN_RESULT, 'k-');
+hold on;
+plot(ADCP_date_datetime, ADCP_Hs, 'r-');
+plot(bouy_date_datetime, bouy_Hs_original, 'b');
+
+legend('RADAR','W-01','Bouy(경포대)')
+
+grid on
+
+set(gca,'fontsize',13)
+xlabel('Date [mm/dd]','fontsize',13);
+ylabel('Hs [m]','fontsize',13);
+title(['Time Series of Significant Wave Height']);
+
+xlim_set = [datetime(2018,11,1) datetime(2020,9,6)];
+xlim(xlim_set)
+ylim([0 7])
 
 
-
+% textbox 생성
+annotation(gcf,'textbox',...
+    [0.065 0.075 0.05 0.05],...
+    'String',{'2019'''},'LineStyle','none','FontWeight','bold','FontSize',14);
