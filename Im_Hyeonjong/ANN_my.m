@@ -263,16 +263,16 @@ for ii = 1 : NMT
 
 end
 
-% Simulate
-zzz_ANN_OUTPUT = zeros(NMT, size(zzz_ANN_TRAINING_INPUT,2));
+%% Simulate
+zzz_ANN_RESULT = zeros(NMT, size(zzz_ANN_INPUT,2));
 
 for ii = 1 : NMT
 
-    for iii = 1 : size(zzz_ANN_TRAINING_INPUT, 2)
-        preprocess_input(:, iii) = gain_input{ii} .* (zzz_ANN_TRAINING_INPUT(:, iii) - offset_input{ii}) - 1;
+    for iii = 1 : size(zzz_ANN_INPUT, 2)
+        preprocess_input(:, iii) = gain_input{ii} .* (zzz_ANN_INPUT(:, iii) - offset_input{ii}) - 1;
     end
 
-    for iii = 1 : size(zzz_ANN_TRAINING_INPUT, 2)
+    for iii = 1 : size(preprocess_input, 2)
         weighted_input = hidden_weight{ii} * preprocess_input(:, iii) + hidden_bias{ii};
         actvation_function = 2 ./ (1 + exp(-2 * weighted_input)) - 1;
         weighted_output{ii}(iii) = output_weight{ii} * actvation_function + output_bias{ii};
@@ -284,15 +284,17 @@ for ii = 1 : NMT
 end
 
 %% Save Result
-zzz_ANN_max = max(zzz_ANN_RESULT, [], 1);
+zzz_ANN_FINAL_RESULT = zzz_ANN_RESULT;
+
+zzz_ANN_max = max(zzz_ANN_FINAL_RESULT, [], 1);
 zzz_ANN_max = movmean(zzz_ANN_max, [2, 0], 'omitnan');
 zzz_ANN_max = movmean(zzz_ANN_max, [2, 0], 'omitnan');
 
-zzz_ANN_min = min(zzz_ANN_RESULT, [], 1);
+zzz_ANN_min = min(zzz_ANN_FINAL_RESULT, [], 1);
 zzz_ANN_min = movmean(zzz_ANN_min, [2, 0], 'omitnan');
 zzz_ANN_min = movmean(zzz_ANN_min, [2, 0], 'omitnan');
 
-zzz_ANN_FINAL_RESULT = mean(zzz_ANN_RESULT, 1);
+zzz_ANN_RESULT = mean(zzz_ANN_FINAL_RESULT, 1);
 
 save([pwd '/ann_240317.mat'], ...
     'hidden_weight', 'hidden_bias', ...
@@ -300,7 +302,7 @@ save([pwd '/ann_240317.mat'], ...
     'gain_input', 'gain_output', ...
     'offset_input', 'offset_output');
 
-zzz_ANN_FINAL_RESULT = zzz_ANN_FINAL_RESULT(1:z_original_size);
+zzz_ANN_RESULT = zzz_ANN_RESULT(1:z_original_size);
 radar_date_datetime = radar_date_datetime(1:z_original_size);
 radar_date_double = radar_date_double(1:z_original_size);
 zzz_bouy_Hs = zzz_bouy_Hs(1:z_original_size);
@@ -317,7 +319,7 @@ figure(1);
 set(gcf, 'position', [300 300 1200 400]);
 hold off;
 
-plot(radar_date_datetime, zzz_ANN_FINAL_RESULT, 'k-');
+plot(radar_date_datetime, zzz_ANN_RESULT, 'k-');
 hold on;
 plot(ADCP_date_datetime, ADCP_Hs, 'r-');
 plot(bouy_date_datetime, bouy_Hs_original, 'b');

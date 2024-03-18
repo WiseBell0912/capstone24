@@ -1,6 +1,6 @@
 function [] = loadw01
 
-filename = [pwd '/선행연구_오찬영/Wave_data_W01_cm(WIN).dat'];
+filename = [pwd '/Oh_Chanyoung/Wave_data_W01_cm(WIN).dat'];
 delimiter = ' ';
 startRow = 2;
 

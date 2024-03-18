@@ -241,6 +241,7 @@ ANN_out = zeros(NMT,size(ANN_SIMULATE_INPUT,2));
 for tempii = 1:NMT
     
 for ii = 1:size(ANN_SIMULATE_INPUT,2)
+    
     pN(:,ii) = Na{tempii}.*(ANN_SIMULATE_INPUT(:,ii) - Nb{tempii}) - 1;
 end
     
@@ -254,6 +255,7 @@ end
     tempii
 end
 
+%%
 ANN_out_point = ANN_out;
 ANN_max = movingA(movingA(max(ANN_out_point,[],1),3),3);
 ANN_min = movingA(movingA(min(ANN_out_point,[],1),3),3);

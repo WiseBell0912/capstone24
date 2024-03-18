@@ -1,6 +1,6 @@
 clear; close all; clc;
 %% 레이다 이전 자료 전부 불러오기
-load([pwd, '\train_data\ANN_radar_out_20_3q_200905.mat']);
+load([pwd, '/Radar/ANN_radar_out_20_3q_200905.mat']);
 % wabs : 풍속 절대값 평균 / wspd_new : 풍속 벡터 평균 / wdir_new : 풍향 벡터 평균 
 % wdir_only : 풍향만 평균  /// 모든 평균은 (계측 시작으로부터) 3분 동안 평균한 것
 
@@ -19,7 +19,7 @@ rrdate_ = set_date;
 size(rrdate)
 
 %% 경포대 부이 결과 가져오기
-load([pwd, '\train_data\bouy_201811to202009.mat']);
+load([pwd, '/DATA/Bouy/bouy_201811to202009.mat']);
 
 % hs_gpd / hmax_gpd / pdir_gpd / set_date / Ts_gpd
 hs_gpd_tr = interp1(set_date,hs_gpd,rrdate_,'linear');
@@ -250,6 +250,7 @@ for tempii = 1:NMT
     tempii
 end
 
+%%
 ANN_out_point = ANN_out;
 ANN_max = movingA(movingA(max(ANN_out_point,[],1),3),3);
 ANN_min = movingA(movingA(min(ANN_out_point,[],1),3),3);
