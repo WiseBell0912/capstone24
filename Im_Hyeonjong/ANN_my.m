@@ -300,7 +300,7 @@ save([pwd '/ann_240317.mat'], ...
     'gain_input', 'gain_output', ...
     'offset_input', 'offset_output');
 
-zzz_ANN_RESULT = zzz_ANN_RESULT(1:z_original_size);
+zzz_ANN_FINAL_RESULT = zzz_ANN_FINAL_RESULT(1:z_original_size);
 radar_date_datetime = radar_date_datetime(1:z_original_size);
 radar_date_double = radar_date_double(1:z_original_size);
 zzz_bouy_Hs = zzz_bouy_Hs(1:z_original_size);
@@ -317,7 +317,7 @@ figure(1);
 set(gcf, 'position', [300 300 1200 400]);
 hold off;
 
-plot(radar_date_datetime, zzz_ANN_RESULT, 'k-');
+plot(radar_date_datetime, zzz_ANN_FINAL_RESULT, 'k-');
 hold on;
 plot(ADCP_date_datetime, ADCP_Hs, 'r-');
 plot(bouy_date_datetime, bouy_Hs_original, 'b');

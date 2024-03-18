@@ -2,6 +2,11 @@ clear; close all; clc;
 %% Data load
 load car_temp.mat;
 img = img_cut;
+figure(1)
+set(gcf, 'position', [300 0 121*4 211*4]);
+surf(img(:, :, 60))
+xlim([1 121]); ylim([1 211]);
+view(2)
 %% Variable setting
 g = 9.81;
 h = 30;
