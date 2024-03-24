@@ -24,7 +24,7 @@ dr = 3; %[m]
 nr = 512;
 mdeg = 76;% modification factor for north correction
 
-rr = sdrng:dr:sdrng+dr*(nr-1);
+rr = sdrng : dr : sdrng+dr*(nr-1);
 
 nimg = 128;
 nbearing = 1080;

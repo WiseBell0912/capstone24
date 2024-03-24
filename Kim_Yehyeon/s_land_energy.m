@@ -1,7 +1,7 @@
 %%
 clear; close all; clc;
 %% calculate land energy level from radar image
-flist = dir('E:/PNG/*.png');
+flist = dir([pwd '/PNG/*.png']);
 
 %%%
 sdrng = 800; %[m]
@@ -20,7 +20,8 @@ land2 = zeros(length(flist), 3);
 land3 = zeros(length(flist), 3);
 
 for ii = 1:length(flist)
-    pngname= ['E:/PNG/', flist(ii).name];
+    ii
+    pngname= [pwd, '/PNG/', flist(ii).name];
 
     data = imread(pngname);
     data = data(1:nr*nbearing*nimg);
