@@ -83,8 +83,8 @@ def pol2png(fileIn, fileOut):
 
 
 # 0 # 파일 경로
-poldir = "/Users/imhyeonjong/Documents/해운대2019/"  # .pol파일 경로
-pngdir = "/Users/imhyeonjong/Documents/해운대2019_png/"  # png 파일 저장 경로
+poldir = "C:/Users/Administrator/Documents/GitHub/capstone24/Im_Hyeonjong/POL"  # .pol파일 경로
+pngdir = "C:/Users/Administrator/Documents/GitHub/capstone24/Im_Hyeonjong/POL"  # png 파일 저장 경로
 
 
 # pol 파일 리스트
