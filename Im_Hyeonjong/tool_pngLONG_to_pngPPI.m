@@ -3,7 +3,7 @@
 clear; close all; clc;
 
 %% pngLong 을 읽어드림
-pngLong = imread([pwd, '/PNG/AIB_20200917_2350.png']);
+pngLong = imread([pwd, '/PNG/AIB_20210610_0000.png']);
 
 %% 초기 설정
 rad_in = 800; % = 800m
@@ -35,18 +35,13 @@ figure(1);
 for i = 1 : time_point
     surf(X, Y, pngLong(:, :, i), 'EdgeAlpha', 0);
     hold on;
-    surf(X(:, [691 723]), Y(:, [691 723]), pngLong(:, [691 723], i));
-    surf(X(:, [168 215]), Y(:, [168 215]), pngLong(:, [168 215], i));
+    %surf(X(:, [691 723]), Y(:, [691 723]), pngLong(:, [691 723], i));
+    %surf(X(:, [168 215]), Y(:, [168 215]), pngLong(:, [168 215], i));
     hold off;
 
     axis equal;
     axis([-rad_out rad_out -rad_out rad_out]);
     view(0, 90);
 
-    pause(0.5);
-end
-
-%% land energy 측정
-for i = 1 : 1
-    means1 = mean
+    pause(0.1);
 end
