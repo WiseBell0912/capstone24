@@ -1,16 +1,16 @@
 clear; close all; clc;
 
 
-flist = dir([pwd, '/임현종/PNG/*.png']); % 길쭉한 파일 png
+flist = dir([pwd, '/PNG/*.png']); % 길쭉한 파일 png
 
 %% save result
 
-for ii = 1:1%length(flist)
-    pngname = [pwd, '/임현종/PNG/', flist(ii).name]
+for ii = 1:length(flist)
+    pngname = [pwd, '/PNG/', flist(ii).name]
     [SNR(ii), signal(ii), noise(ii), Tp(ii), Pdir(ii)] = cal1st(pngname)
 end
 
-save([pwd, '/임현종/Wave Parameter/result1st_surf.mat'],'SNR','signal','noise','Tp','Pdir')
+save([pwd, '/Wave Parameter/wave_parameter.mat'],'SNR','signal','noise','Tp','Pdir')
 
 function [SNR, signal, noise, Tp, Pdir] = cal1st(pngname)
 
