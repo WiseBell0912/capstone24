@@ -48,5 +48,5 @@ for ii = 1:length(flist)
 
     disp((ii/length(flist))*100)
 end
-
+%%
 save land_energy_new land
