@@ -3,7 +3,7 @@
 clear; close all; clc;
 
 %% pngLong 을 읽어드림
-pngLong = imread([pwd, '/PNG/AIB_20210610_0000.png']);
+pngLong = imread([pwd, '/PNG/AIB_20190815_0450.png']);
 
 %% 초기 설정
 rad_in = 800; % = 800m
@@ -35,8 +35,9 @@ figure(1);
 for i = 1 : time_point
     surf(X, Y, pngLong(:, :, i), 'EdgeAlpha', 0);
     hold on;
-    %surf(X(:, [691 723]), Y(:, [691 723]), pngLong(:, [691 723], i));
-    %surf(X(:, [168 215]), Y(:, [168 215]), pngLong(:, [168 215], i));
+    %surf(X(:, [1 2]), Y(:, [1 2]), pngLong(:, [1 2], i));
+    surf(X([1 2 511 512], [691 692 722 723]), Y([1 2 511 512], [691 692 722 723]), pngLong([1 2 511 512], [691 692 722 723], i));
+    surf(X([1 2 511 512], [168 169 214 215]), Y([1 2 511 512], [168 169 214 215]), pngLong([1 2 511 512], [168 169 214 215], i));
     hold off;
 
     axis equal;
