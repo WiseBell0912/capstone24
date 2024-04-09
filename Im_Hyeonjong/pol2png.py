@@ -83,13 +83,9 @@ def pol2png(fileIn, fileOut):
 
 
 # 0 # 파일 경로
-<<<<<<< HEAD
 poldir = "C:/Users/Administrator/Documents/GitHub/capstone24/Im_Hyeonjong/POL/"  # .pol파일 경로
 pngdir = "C:/Users/Administrator/Documents/GitHub/capstone24/Im_Hyeonjong/PNG/"  # png 파일 저장 경로
-=======
-poldir = "/Users/imhyeonjong/Documents/POL/"  # .pol파일 경로
-pngdir = "/Users/imhyeonjong/Documents/POL/"  # png 파일 저장 경로
->>>>>>> d46012bae40b32f9a63c6eb5162071fe33760f35
+
 
 
 # pol 파일 리스트
