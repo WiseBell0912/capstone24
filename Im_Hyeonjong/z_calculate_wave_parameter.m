@@ -1,27 +1,32 @@
 clear; close all; clc;
 
 
-flist = dir("D:/PNG_2009_2012/*.png"); % pngLONG
+flist = dir("D:/PNG_2107_2306/*.png"); % pngLONG
 
 %% save result
 
 for ii = 1:length(flist)
-    pngname = ['D:/PNG_2009_2012/' flist(ii).name]
-    [SNR(ii), signal(ii), noise(ii), Tp(ii), Pdir(ii)] = cal1st(pngname);
+    pngname = ['D:/PNG_2107_2306/' flist(ii).name]
+    [SNR(ii), signal(ii), noise(ii), Tp(ii), Pdir(ii), date(ii)] = cal1st(pngname);
     
     disp(SNR(ii))
     disp(signal(ii))
     disp(noise(ii))
     disp(Tp(ii))
     disp(Pdir(ii))
+    disp(date(ii))
+
+    t = now;
+    disp(datetime(t,'ConvertFrom','datenum'))
 end
 
-save([pwd, '/Wave Parameter/wave_parameter.mat'],'SNR','signal','noise','Tp','Pdir')
+save([pwd, '/wave_parameter.mat'],'SNR','signal','noise','Tp','Pdir', 'date')
 
-function [SNR, signal, noise, Tp, Pdir] = cal1st(pngname)
+function [SNR, signal, noise, Tp, Pdir, date] = cal1st(pngname)
 
 rdata = imread(pngname);
 
+date = datetime(pngname([22:34]), 'Inputformat', 'yyyyMMdd_HHmm');
 %%
 
 %%%%%%%%%%%%%%
