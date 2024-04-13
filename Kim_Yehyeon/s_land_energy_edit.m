@@ -24,7 +24,7 @@ clear; close all; clc;
 load land_energy_level_2018_2020.mat
 
 energy_level(14175:40028, 2) = energy_level(14175:40028, 2) - (59.4873 - (50.6238+52.1382)/2);
-energy_level(14175:40028, 3) = energy_level(14175:40028, 3) - (60.9884 - (53.4742+54.1248)/2);
+    
 energy_level(14175:40028, 4) = energy_level(14175:40028, 4) - (120.4757 - (104.0980+106.2630)/2);
 
 energy_level = energy_level(7063:end, :);
