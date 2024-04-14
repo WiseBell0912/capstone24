@@ -6,17 +6,17 @@ clear; close all; clc;
 %% radar 데이터 로드 및 처리
 
 % wave parameter
-load("2. Data\Wave Parameter\wave_parameter_combined.mat");
+load([pwd '/2. Data/Wave Parameter/wave_parameter_combined.mat']);
 % land energy
-load("2. Data\Land energy\land_energy_combined_normalized.mat");
+load([pwd '/2. Data/Land energy/land_energy_combined_normalized.mat']);
 % land TF
-load("2. Data\Land TF\land_TF_combined_std_1.mat");
+load([pwd '/2. Data/Land TF/land_TF_combined_std_1.mat']);
 
 
 %% bouy 데이터 로드 및 처리
 
 % bouy Hs
-load("2. Data\Bouy\bouy_Hs_2018_2023_combined_movmeaned.mat");
+load([pwd '/2. Data/Bouy/bouy_Hs_2018_2023_combined_movmeaned.mat']);
 
 % radar 와 기간을 맞추기 위해 보간
 bouy_Hs_interpol = interp1(bouy_date, bouy_Hs, radar_date, 'linear');
