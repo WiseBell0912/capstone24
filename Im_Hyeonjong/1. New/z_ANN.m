@@ -184,7 +184,7 @@ ANN_TRAINING_INPUT = ANN_INPUT_DATA(:, step3_checker);
 ANN_TRAINING_OUTPUT = bouy_Hs_interpol(:, step3_checker);
 
 for i = 1 : NMT
-   net = feedforwardnet(12);
+   net = feedforwardnet(Neuron_hidden);
    net = initlay(net);
 
    net.divideFcn = 'dividerand';
@@ -215,3 +215,155 @@ for i = 1 : NMT
    disp('training'); disp(i);
 end
 
+
+%% ANN 시뮬레이션
+
+ANN_RESULT = zeros(NMT, size(ANN_INPUT_DATA, 2));
+
+for i = 1 : NMT
+    
+    for ii = 1 : size(ANN_INPUT_DATA, 2)
+        preprocess_input(:, ii) = gain_input{i} .* (ANN_INPUT_DATA(:, ii) - offset_input{i}) - 1;
+    end
+
+    for ii = 1 : size(preprocess_input, 2)
+        weighted_input = hidden_weight{i} * preprocess_input(:, ii) + hidden_bias{i};
+        actvation_function = 2 ./ (1 + exp(-2 * weighted_input)) - 1;
+        weighted_output{i}(ii) = output_weight{i} * actvation_function + output_bias{i};
+    end
+
+    ANN_RESULT(i, :) = (weighted_output{i} + 1) / gain_output{i} + offset_output{i};
+    disp(i);
+
+end
+
+
+%% 작업 공간 정리
+
+clear actvation_function i ii Neuron_hidden NMT preprocess_input step3_checker
+
+
+%% 결과 저장
+
+ANN_RESULT_FINAL = mean(ANN_RESULT, 1);
+
+save ANN_2024_04_14_21_30.mat ...
+    hidden_weight hidden_bias ...
+    output_weight output_bias ...
+    gain_input gain_output ...
+    offset_input offset_output ...
+    bouy_date ...
+    bouy_Hs ...
+    radar_date ...
+    bouy_Hs_interpol ...
+    ANN_RESULT_FINAL;
+
+
+%% 결과 비교 (년도별)
+
+for year = 2019:2023
+    figure(1);
+    set(gcf, 'position', [0 0 1800 900])
+    hold on;
+
+    % Radar Hs 
+    a1 = plot(radar_date, ANN_RESULT_FINAL, 'r-', 'LineWidth', 1);
+    a1.Color(4) = 0.5;
+    % Bouy Hs
+    a2 = plot(bouy_date, bouy_Hs, 'b-', 'LineWidth', 1);
+    a2.Color(4) = 0.5;
+    % 속성
+    title('Significant Wave Height (Hs)', 'FontSize', 15);
+    xlabel('Date [mm/dd]', 'FontSize', 13);
+    ylabel('Hs [m]', 'FontSize', 13);
+    legend('RADAR', 'BOUY', 'Location', 'northeast');
+    grid on;
+    % 부분만 보기
+    xlim([datetime(year, 1, 1) datetime(year, 12, 31)]);
+    ylim([0, 7]);
+
+    hold off;
+
+    name = [num2str(year) '_0.png'];
+    saveas(gcf,name);
+end
+
+%% 결과 비교 (월별)
+
+for year = 2019:2023
+    for month = 1 : 12
+        figure(1);
+        set(gcf, 'position', [0 0 1800 900])
+        hold on;
+
+        % Radar Hs 
+        a1 = plot(radar_date, ANN_RESULT_FINAL, 'r-', 'LineWidth', 1);
+        a1.Color(4) = 0.5;
+        % Bouy Hs
+        a2 = plot(bouy_date, bouy_Hs, 'b-', 'LineWidth', 1);
+        a2.Color(4) = 0.5;
+        % 속성
+        title('Significant Wave Height (Hs)', 'FontSize', 15);
+        xlabel('Date [mm/dd]', 'FontSize', 13);
+        ylabel('Hs [m]', 'FontSize', 13);
+        legend('RADAR', 'BOUY', 'Location', 'northeast');
+        grid on;
+        % 부분만 보기
+        xlim([datetime(year, month, 1) datetime(year, month, 31)]);
+        ylim([0, 7]);
+
+        hold off;
+
+        name = [num2str(year) '_' num2str(month) '.png'];
+        saveas(gcf,name);
+    end
+end
+
+%% 오차 확인
+
+figure(2);
+set(gcf, 'position', [0 0 900 900])
+hold on;
+
+% Radar vs Bouy
+b1 = plot(ANN_RESULT_FINAL, bouy_Hs_interpol, '.', 'MarkerSize', 0.3);
+% 비교 선
+b2 = plot([0, 10], [0, 10], 'r-');
+b2.Color(4) = 0.5;
+b3 = plot([0, 10], [-1, 9], 'r--');
+b3.Color(4) = 0.5;
+b4 = plot([0, 10], [1, 11], 'r--');
+b4.Color(4) = 0.5;
+legend('error', 'X = Y', '1m error', 'Location', 'southeast');
+% 속성
+title('Error of ANN', 'FontSize', 15);
+xlabel('Radar Hs [m]', 'FontSize', 13);
+ylabel('Bouy Hs [m]', 'FontSize', 13);
+% 부분만 보기
+xlim([0, 6]);
+ylim([0, 6]);
+% 오차 수치
+text(4.9, 0.7, ['1.0m error : 0.251%' newline '0.5m error : 1.710%']);
+
+
+%% 오차 수치화
+
+error = ANN_RESULT_FINAL - bouy_Hs_interpol;
+% + - 1m error
+count = 0;
+for i = 1 : length(error)
+    if error(i) < -1 || 1 < error(i)
+        count = count + 1;
+    end
+end
+error_persentage = count / length(error) * 100;
+disp('+ - 1m error'); disp(error_persentage);
+% + - 0.5m error
+count = 0;
+for i = 1 : length(error)
+    if error(i) < -0.5 || 0.5 < error(i)
+        count = count + 1;
+    end
+end
+error_persentage = count / length(error) * 100;
+disp('+ - 0.5m error'); disp(error_persentage);
