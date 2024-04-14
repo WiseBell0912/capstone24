@@ -1,0 +1,91 @@
+%% land energy 를 baseline shift normalization 하는 스크립트
+clear; close all; clc;
+
+%% land energy 로드
+load("2. Data/Land energy/land_energy_combined.mat");
+
+%% 구간 확인
+
+% 2019-07-01 00:00 ~ 2020-09-05 12:00
+% mean : 105.6318
+% index : from 1 to 61909
+mean1 = mean(radar_land_energy(1:61909));
+
+% 2020-09-17 23:50 ~ 2020-11-30 10:20
+% mean : 53.7978
+% index : from 61910 to 72459
+mean2 = mean(radar_land_energy(61910:72459));
+
+% 2020-11-30 10:30 ~ 2021-06-05 15:00
+% mean : 54.0131
+% index : from 72460 to 99354
+mean3 = mean(radar_land_energy(72460:99354));
+
+% 2021-06-05 15:10 ~ 2022-04-14 16:10
+% mean : 62.1455
+% index : from 99355 to 144389
+mean4 = mean(radar_land_energy(99355:144389));
+
+% 2022-04-22 16:10 ~ 2022-07-19 04:00
+% mean : 54.5253
+% index : from 144390 to 156977
+mean5 = mean(radar_land_energy(144390:156977));
+
+% 2022-07-31 17:50 ~ 2022-08-10 11:10
+% mean : 62.0401
+% index : from 156978 to 158374
+mean6 = mean(radar_land_energy(156978:158374));
+
+% 2022-08-11 15:10 ~ 2023-01-14 03:40
+% mean : 53.6993
+% index : from 158375 to 180726
+mean7 = mean(radar_land_energy(158375:180726));
+
+% 2023-01-17 10:30 ~ 2023-06-01 18:30
+% mean : 62.3326
+% index : from 180727 to 200179
+mean8 = mean(radar_land_energy(180727:200179));
+
+% 2023-06-01 19:10 ~ 2023-07-01 00:00
+% mean : 54.0041
+% index : from 200180 to 204374
+mean9 = mean(radar_land_energy(200180:204374));
+
+mean_total = (mean1 + mean2 + mean3 + mean4 + mean5 + mean6 + mean7 + mean8 + mean9) / 9;
+
+%% baseline shift normalization
+radar_land_energy_normalized(1:61909) = radar_land_energy(1:61909) - (mean1 - mean_total);
+radar_land_energy_normalized(61910:72459) = radar_land_energy(61910:72459) - (mean2 - mean_total);
+radar_land_energy_normalized(72460:99354) = radar_land_energy(72460:99354) - (mean3 - mean_total);
+radar_land_energy_normalized(99355:144389) = radar_land_energy(99355:144389) - (mean4 - mean_total);
+radar_land_energy_normalized(144390:156977) = radar_land_energy(144390:156977) - (mean5 - mean_total);
+radar_land_energy_normalized(156978:158374) = radar_land_energy(156978:158374) - (mean6 - mean_total);
+radar_land_energy_normalized(158375:180726) = radar_land_energy(158375:180726) - (mean7 - mean_total);
+radar_land_energy_normalized(180727:200179) = radar_land_energy(180727:200179) - (mean8 - mean_total);
+radar_land_energy_normalized(200180:204374) = radar_land_energy(200180:204374) - (mean9 - mean_total);
+
+%% plot original ver.
+plot(radar_date, radar_land_energy);
+title('Original', 'FontSize', 15);
+xlabel('Date', 'FontSize', 13);
+ylabel('Land Energy', 'FontSize', 13);
+hold on;
+
+%% plot normalized ver.
+plot(radar_date, radar_land_energy_normalized);
+title('Original', 'FontSize', 15);
+xlabel('Date', 'FontSize', 13);
+ylabel('Land Energy', 'FontSize', 13);
+hold on;
+
+%% plot criteria
+mean_total_normalized = mean(radar_land_energy_normalized);
+std_total_normalized = std(radar_land_energy_normalized);
+
+criteria = ones(size(radar_land_energy_normalized)) * (mean_total_normalized + std_total_normalized * 2);
+
+plot(radar_date, criteria);
+hold off;
+
+%% 
+l_TF = logical(radar_land_energy_normalized >= (mean_total_normalized + std_total_normalized * 2));

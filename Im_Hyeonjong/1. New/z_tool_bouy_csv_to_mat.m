@@ -2,7 +2,7 @@
 clear; close all; clc;
 
 %% csv 형태의 부이 데이터 로드 (로드 파일명 수정 필요)
-filename = "2. Data/Bouy/bouy_Hs_2022.csv";
+filename = "2. Data/Bouy/bouy_Hs_2023_07.csv";
 
 % 데이터 로드 옵션 감지
 opts = detectImportOptions(filename);
@@ -29,4 +29,4 @@ date = data.date';
 Hs = data.Hs';
 
 %% 저장 (저장 파일명 수정 필요)
-save bouy_Hs_2022 date Hs
+save bouy_Hs_2023_07 date Hs
