@@ -367,3 +367,32 @@ for i = 1 : length(error)
 end
 error_persentage = count / length(error) * 100;
 disp('+ - 0.5m error'); disp(error_persentage);
+
+
+%% 결정 계수
+
+% 임의의 관측값과 예측값 예제
+y_obs = bouy_Hs_interpol;
+y_pred = ANN_RESULT_FINAL;
+
+% 결정계수 계산
+R_squared = calculateR2(y_obs, y_pred);
+fprintf('결정계수(R^2): %.3f\n', R_squared);
+
+function R2 = calculateR2(y_obs, y_pred)
+    % y_obs : 관측된 데이터
+    % y_pred : 모델에 의해 예측된 데이터
+    
+    % 잔차 제곱합 (SSE)
+    residuals = y_obs - y_pred;
+    SSE = sum(residuals.^2, 'omitnan');
+    
+    % 총 변동 (SST)
+    mean_y_obs = mean(y_obs, 'omitnan');
+    SST = sum((y_obs - mean_y_obs).^2, 'omitnan');
+    
+    % 결정계수 (R-squared)
+    R2 = 1 - SSE/SST;
+end
+
+
