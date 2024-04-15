@@ -336,14 +336,16 @@ b4 = plot([0, 10], [1, 11], 'r--');
 b4.Color(4) = 0.5;
 legend('error', 'X = Y', '1m error', 'Location', 'southeast');
 % 속성
-title('Error of ANN', 'FontSize', 15);
+title('Error of ANN, R^2 = 0.901', 'FontSize', 15);
 xlabel('Radar Hs [m]', 'FontSize', 13);
 ylabel('Bouy Hs [m]', 'FontSize', 13);
 % 부분만 보기
 xlim([0, 6]);
 ylim([0, 6]);
 % 오차 수치
-text(4.9, 0.7, ['1.0m error : 0.251%' newline '0.5m error : 1.710%']);
+text(4.9, 0.8, ['1.0m error : 0.251%' newline '0.5m error : 1.710%']);
+
+saveas(gcf, 'error.png');
 
 
 %% 오차 수치화
