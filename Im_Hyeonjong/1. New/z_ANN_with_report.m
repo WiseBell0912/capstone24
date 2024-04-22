@@ -6,17 +6,17 @@ clear; close all; clc;
 %% radar 데이터 로드 및 처리
 
 % wave parameter
-load([pwd '/2. Data/Wave Parameter/wave_parameter_combined.mat']);
+load([pwd '/2. Data/Wave Parameter/wave_parameter_1907_2012.mat']);
 % land energy
-load([pwd '/2. Data/Land energy/land_energy_combined_normalized.mat']);
+load([pwd '/2. Data/Land energy/land_energy_1907_2012_normalized.mat']);
 % land TF
-load([pwd '/2. Data/Land TF/land_TF_combined_std_1.mat']);
+load([pwd '/2. Data/Land TF/land_TF_1907_2012_std_1.mat']);
 
 
 %% bouy 데이터 로드 및 처리
 
 % bouy Hs
-load([pwd '/2. Data/Bouy/bouy_Hs_2018_2023_combined_movmeaned.mat']);
+load([pwd '/2. Data/Bouy/bouy_Hs_1907_2012_movmeaned.mat']);
 
 % radar 와 기간을 맞추기 위해 보간
 bouy_Hs_interpol = interp1(bouy_date, bouy_Hs, radar_date, 'linear');
@@ -24,7 +24,7 @@ bouy_Hs_interpol = interp1(bouy_date, bouy_Hs, radar_date, 'linear');
 
 %% 데이터 가공 step 1. (이동 평균, 지역 최대/최소)
 % 전향 3점 이동 평균 : 1점 = 10분
-% 6시간 지역 최대/최소 : 36점 = 360분 = 6시간
+% 전향 36점 지역 최대/최소 : 36점 = 360분 = 6시간
 
 local_duration = 36;
 
@@ -119,8 +119,8 @@ end
 
 idx_last = length(radar_date);
 idx1 = [1:idx_last];
-idx2 = [2:idx_last, idx_last];
-idx3 = [3:idx_last, idx_last, idx_last];
+idx2 = [1, 1:idx_last-1];
+idx3 = [1, 1, 1:idx_last-2];
 
 ANN_INPUT_DATA = [
     radar_land_energy(idx1) ; radar_land_energy(idx2) ; radar_land_energy(idx3) ;
@@ -247,7 +247,7 @@ clear actvation_function i ii Neuron_hidden NMT preprocess_input step3_checker
 
 ANN_RESULT_FINAL = mean(ANN_RESULT, 1);
 
-save ANN_2024_04_14_21_30.mat ...
+save ANN_2024_04_23_03_48.mat ...
     hidden_weight hidden_bias ...
     output_weight output_bias ...
     gain_input gain_output ...
