@@ -1,19 +1,26 @@
-%% 알고리즘 결과 확인 스크립트
+%% 인공 신경망을 사용한 유의파고 추정 스크립트
 
 clear; close all; clc;
 
-ANN_name = 'ANN_2024_04_28_21_35';
 
 %% radar 데이터 로드 및 처리
 
 % wave parameter
-load([pwd '/2. Data/Wave Parameter/wave_parameter_combined.mat']);
+load([pwd '/2. Data/Wave Parameter/wave_parameter_1907_2012.mat']);
 % land energy
-load([pwd '/2. Data/Land energy/land_energy_combined_normalized.mat']);
+load([pwd '/2. Data/Land energy/land_energy_1907_2012_normalized.mat']);
 % land TF
-load([pwd '/2. Data/Land TF/land_TF_combined_std_1.mat']);
+load([pwd '/2. Data/Land TF/land_TF_1907_2012_std_1.mat']);
 
-plot_radar_date = radar_date;
+
+%% bouy 데이터 로드 및 처리
+
+% bouy Hs
+load([pwd '/2. Data/Bouy/bouy_Hs_1907_2012_movmeaned.mat']);
+
+% radar 와 기간을 맞추기 위해 보간
+bouy_Hs_interpol = interp1(bouy_date, bouy_Hs, radar_date, 'linear');
+
 
 %% 데이터 가공 step 1. (이동 평균, 지역 최대/최소)
 % 전향 3점 이동 평균 : 1점 = 10분
@@ -112,8 +119,8 @@ end
 
 idx_last = length(radar_date);
 idx1 = [1:idx_last];
-idx2 = [1, 1:idx_last-1];
-idx3 = [1, 1, 1:idx_last-2];
+idx2 = [2:idx_last idx_last];
+idx3 = [3:idx_last idx_last idx_last];
 
 ANN_INPUT_DATA = [
     radar_land_energy(idx1) ; radar_land_energy(idx2) ; radar_land_energy(idx3) ;
@@ -146,16 +153,75 @@ ANN_INPUT_DATA = [
 clear i idx1 idx2 idx3 idx_last local_duration
 
 
-%% 알고리즘 불러오기
+%% 데이터 가공 step 3.
+% 파고가 10분간격으로 엄청 무자비하게 변하는게 아님, 따라서 12시간 최대/최소 값을 가지는 시퀀스만 사용.
 
-load([pwd '/4. Result/' ANN_name '/', ANN_name, '.mat']);
+step3_radar_date_num = datenum(radar_date);
+
+step3_local_period = 0.5;
+step3_local_step = step3_radar_date_num(2) - step3_radar_date_num(1);
+step3_local_count = ceil(step3_local_period / step3_local_step);
+step3_total_count = floor(length(step3_radar_date_num) / step3_local_count);
+step3_checker = false(size(step3_radar_date_num));
+
+for i = 1 : step3_total_count
+    step3_idx = (i - 1) * step3_local_count + 1 : i * step3_local_count;
+    step3_temp = bouy_Hs_interpol(step3_idx);
+    [step3_temp_max step3_idx_max] = max(step3_temp);
+    [step3_temp_min step3_idx_min] = min(step3_temp);
+    step3_checker([ (i-1)*step3_local_count+step3_idx_max , (i-1)*step3_local_count+step3_idx_min ]) = true;
+end
+
+clear i step3_idx step3_idx_max step3_idx_min step3_local_count step3_local_period step3_local_step step3_radar_date_num step3_temp step3_temp_max step3_temp_min step3_total_count
 
 
-%% 알고리즘 수행
+%% ANN 훈련
 
-ANN_RESULT = zeros(100, size(ANN_INPUT_DATA, 2));
+Neuron_hidden = 12;
+net = 0;
+NMT = 100;
 
-for i = 1 : 100
+ANN_TRAINING_INPUT = ANN_INPUT_DATA(:, step3_checker);
+ANN_TRAINING_OUTPUT = bouy_Hs_interpol(:, step3_checker);
+
+for i = 1 : NMT
+   net = feedforwardnet(Neuron_hidden);
+   net = initlay(net);
+
+   net.divideFcn = 'dividerand';
+   net.divideParam.trainRatio = 0.7;
+   net.divideParam.valRatio = 0.15;
+   net.divideParam.testRatio = 0.15;
+
+   net.trainFcn = 'trainlm';
+
+   net.trainParam.epochs = 1000;
+
+   net = train(net, ANN_TRAINING_INPUT, ANN_TRAINING_OUTPUT, 'useGPU', 'no');
+
+   hidden_weight{i} = net.IW{1};
+   output_weight{i} = net.LW{2};
+   
+   hidden_bias{i} = net.b{1};
+   output_bias{i} = net.b{2};
+
+   gain_input{i} = net.input.processSettings{1}.gain;
+   offset_input{i} = net.input.processSettings{1}.xoffset;
+
+   gain_output{i} = net.output.processSettings{1}.gain;
+   offset_output{i} = net.output.processSettings{1}.xoffset;
+
+   clear net;
+   
+   disp('training'); disp(i);
+end
+
+
+%% ANN 시뮬레이션
+
+ANN_RESULT = zeros(NMT, size(ANN_INPUT_DATA, 2));
+
+for i = 1 : NMT
     
     for ii = 1 : size(ANN_INPUT_DATA, 2)
         preprocess_input(:, ii) = gain_input{i} .* (ANN_INPUT_DATA(:, ii) - offset_input{i}) - 1;
@@ -172,91 +238,23 @@ for i = 1 : 100
 
 end
 
-plot_ANN_RESULT_FINAL = mean(ANN_RESULT, 1);
+
+%% 작업 공간 정리
+
+clear actvation_function i ii Neuron_hidden NMT preprocess_input step3_checker
 
 
-%% 부이 데이터 로드
+%% 결과 저장
 
-load([pwd '/2. Data/Bouy/bouy_Hs_2019_2023_combined_movmeaned.mat']);
+ANN_RESULT_FINAL = mean(ANN_RESULT, 1);
 
-plot_bouy_date = bouy_date;
-plot_bouy_Hs = bouy_Hs;
-plot_bouy_Hs_interpol = interp1(plot_bouy_date, plot_bouy_Hs, plot_radar_date, 'linear');
-
-
-%% 데이터 정리
-
-clearvars -except plot_radar_date plot_ANN_RESULT_FINAL plot_bouy_date plot_bouy_Hs plot_bouy_Hs_interpol ANN_name
-
-
-%% 결정 계수 도출
-y_obs = plot_bouy_Hs_interpol(76992:end);
-y_pred = plot_ANN_RESULT_FINAL(76992:end);
-residuals = y_obs - y_pred;
-SSE = sum(residuals.^2, 'omitnan');
-mean_y_obs = mean(y_obs, 'omitnan');
-SST = sum((y_obs - mean_y_obs).^2, 'omitnan');
-R_squared = 1 - SSE/SST;
-
-clear y_obs y_pred residuals SSE mean_y_obs SST
-
-
-%% 에러 그래프
-figure(2);
-set(gcf, 'position', [0 0 900 900]);
-hold on;
-
-% Radar vs Bouy
-b1 = plot(plot_ANN_RESULT_FINAL(76992:end), plot_bouy_Hs_interpol(76992:end), '.', 'MarkerSize', 0.3);
-% 비교 선
-b2 = plot([0, 10], [0, 10], 'r-');
-b2.Color(4) = 0.5;
-b3 = plot([0, 10], [-1, 9], 'r--');
-b3.Color(4) = 0.5;
-b4 = plot([0, 10], [1, 11], 'r--');
-b4.Color(4) = 0.5;
-legend('error', 'X = Y', '1m error', 'Location', 'southeast');
-% 속성
-title(['Error of ANN, R^2 = ', num2str(R_squared)], 'FontSize', 15);
-xlabel('Radar Hs [m]', 'FontSize', 13);
-ylabel('Bouy Hs [m]', 'FontSize', 13);
-% 부분만 보기
-xlim([0, 6]);
-ylim([0, 6]); 
-
-hold off;
-
-saveas(gcf, [ANN_name, '_error.png']);
-
-
-%% 비교 그래프
-% 앞 뒤 각각 30분 이동 평균, 즉 앞 뒤 각각 3점 이동 평균
-
-for year = 2019:2023
-    for month = 1 : 12
-        figure(1);
-        set(gcf, 'position', [0 0 1800 900])
-        hold on;
-
-        % Radar Hs 
-        a1 = plot(plot_radar_date, movmean(plot_ANN_RESULT_FINAL, [3 3]), 'r-', 'LineWidth', 0.5);
-        a1.Color(4) = 0.5;
-        % Bouy Hs
-        a2 = plot(plot_bouy_date, movmean(plot_bouy_Hs, [6 6]), 'b-', 'LineWidth', 0.5);
-        a2.Color(4) = 0.5;
-        % 속성
-        title('Significant Wave Height (Hs)', 'FontSize', 15);
-        xlabel('Date [mm/dd]', 'FontSize', 13);
-        ylabel('Hs [m]', 'FontSize', 13);
-        legend('RADAR', 'BOUY', 'Location', 'northeast');
-        grid on;
-        % 부분만 보기
-        xlim([datetime(year, month, 1) datetime(year, month, 31)]);
-        ylim([0, 7]);
-
-        hold off;
-
-        name = [ANN_name '_' num2str(year) '_' num2str(month) '.png'];
-        saveas(gcf,name);
-    end
-end
+save ANN_2024_04_28_21_35.mat ...
+    hidden_weight hidden_bias ...
+    output_weight output_bias ...
+    gain_input gain_output ...
+    offset_input offset_output ...
+    bouy_date ...
+    bouy_Hs ...
+    radar_date ...
+    bouy_Hs_interpol ...
+    ANN_RESULT_FINAL;

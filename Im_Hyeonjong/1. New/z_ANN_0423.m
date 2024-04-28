@@ -153,14 +153,36 @@ ANN_INPUT_DATA = [
 clear i idx1 idx2 idx3 idx_last local_duration
 
 
+%% 데이터 가공 step 3.
+% 파고가 10분간격으로 엄청 무자비하게 변하는게 아님, 따라서 12시간 최대/최소 값을 가지는 시퀀스만 사용.
+
+step3_radar_date_num = datenum(radar_date);
+
+step3_local_period = 0.5;
+step3_local_step = step3_radar_date_num(2) - step3_radar_date_num(1);
+step3_local_count = ceil(step3_local_period / step3_local_step);
+step3_total_count = floor(length(step3_radar_date_num) / step3_local_count);
+step3_checker = false(size(step3_radar_date_num));
+
+for i = 1 : step3_total_count
+    step3_idx = (i - 1) * step3_local_count + 1 : i * step3_local_count;
+    step3_temp = bouy_Hs_interpol(step3_idx);
+    [step3_temp_max step3_idx_max] = max(step3_temp);
+    [step3_temp_min step3_idx_min] = min(step3_temp);
+    step3_checker([ (i-1)*step3_local_count+step3_idx_max , (i-1)*step3_local_count+step3_idx_min ]) = true;
+end
+
+clear i step3_idx step3_idx_max step3_idx_min step3_local_count step3_local_period step3_local_step step3_radar_date_num step3_temp step3_temp_max step3_temp_min step3_total_count
+
+
 %% ANN 훈련
 
 Neuron_hidden = 12;
 net = 0;
 NMT = 100;
 
-ANN_TRAINING_INPUT = ANN_INPUT_DATA;
-ANN_TRAINING_OUTPUT = bouy_Hs_interpol;
+ANN_TRAINING_INPUT = ANN_INPUT_DATA(:, step3_checker);
+ANN_TRAINING_OUTPUT = bouy_Hs_interpol(:, step3_checker);
 
 for i = 1 : NMT
    net = feedforwardnet(Neuron_hidden);
@@ -236,144 +258,3 @@ save ANN_2024_04_23_03_48.mat ...
     radar_date ...
     bouy_Hs_interpol ...
     ANN_RESULT_FINAL;
-
-
-%% 결과 비교 (년도별)
-
-for year = 2019:2023
-    figure(1);
-    set(gcf, 'position', [0 0 1800 900])
-    hold on;
-
-    % Radar Hs 
-    a1 = plot(radar_date, ANN_RESULT_FINAL, 'r-', 'LineWidth', 1);
-    a1.Color(4) = 0.5;
-    % Bouy Hs
-    a2 = plot(bouy_date, bouy_Hs, 'b-', 'LineWidth', 1);
-    a2.Color(4) = 0.5;
-    % 속성
-    title('Significant Wave Height (Hs)', 'FontSize', 15);
-    xlabel('Date [mm/dd]', 'FontSize', 13);
-    ylabel('Hs [m]', 'FontSize', 13);
-    legend('RADAR', 'BOUY', 'Location', 'northeast');
-    grid on;
-    % 부분만 보기
-    xlim([datetime(year, 1, 1) datetime(year, 12, 31)]);
-    ylim([0, 7]);
-
-    hold off;
-
-    name = [num2str(year) '_0.png'];
-    saveas(gcf,name);
-end
-
-%% 결과 비교 (월별)
-
-for year = 2019:2023
-    for month = 1 : 12
-        figure(1);
-        set(gcf, 'position', [0 0 1800 900])
-        hold on;
-
-        % Radar Hs 
-        a1 = plot(radar_date, ANN_RESULT_FINAL, 'r-', 'LineWidth', 1);
-        a1.Color(4) = 0.5;
-        % Bouy Hs
-        a2 = plot(bouy_date, bouy_Hs, 'b-', 'LineWidth', 1);
-        a2.Color(4) = 0.5;
-        % 속성
-        title('Significant Wave Height (Hs)', 'FontSize', 15);
-        xlabel('Date [mm/dd]', 'FontSize', 13);
-        ylabel('Hs [m]', 'FontSize', 13);
-        legend('RADAR', 'BOUY', 'Location', 'northeast');
-        grid on;
-        % 부분만 보기
-        xlim([datetime(year, month, 1) datetime(year, month, 31)]);
-        ylim([0, 7]);
-
-        hold off;
-
-        name = [num2str(year) '_' num2str(month) '.png'];
-        saveas(gcf,name);
-    end
-end
-
-%% 오차 확인
-
-figure(2);
-set(gcf, 'position', [0 0 900 900])
-hold on;
-
-% Radar vs Bouy
-b1 = plot(ANN_RESULT_FINAL, bouy_Hs_interpol, '.', 'MarkerSize', 0.3);
-% 비교 선
-b2 = plot([0, 10], [0, 10], 'r-');
-b2.Color(4) = 0.5;
-b3 = plot([0, 10], [-1, 9], 'r--');
-b3.Color(4) = 0.5;
-b4 = plot([0, 10], [1, 11], 'r--');
-b4.Color(4) = 0.5;
-legend('error', 'X = Y', '1m error', 'Location', 'southeast');
-% 속성
-title('Error of ANN, R^2 = 0.901', 'FontSize', 15);
-xlabel('Radar Hs [m]', 'FontSize', 13);
-ylabel('Bouy Hs [m]', 'FontSize', 13);
-% 부분만 보기
-xlim([0, 6]);
-ylim([0, 6]);
-% 오차 수치
-text(4.9, 0.8, ['1.0m error : 0.251%' newline '0.5m error : 1.710%']);
-
-saveas(gcf, 'error.png');
-
-
-%% 오차 수치화
-
-error = ANN_RESULT_FINAL - bouy_Hs_interpol;
-% + - 1m error
-count = 0;
-for i = 1 : length(error)
-    if error(i) < -1 || 1 < error(i)
-        count = count + 1;
-    end
-end
-error_persentage = count / length(error) * 100;
-disp('+ - 1m error'); disp(error_persentage);
-% + - 0.5m error
-count = 0;
-for i = 1 : length(error)
-    if error(i) < -0.5 || 0.5 < error(i)
-        count = count + 1;
-    end
-end
-error_persentage = count / length(error) * 100;
-disp('+ - 0.5m error'); disp(error_persentage);
-
-
-%% 결정 계수
-
-% 임의의 관측값과 예측값 예제
-y_obs = bouy_Hs_interpol;
-y_pred = ANN_RESULT_FINAL;
-
-% 결정계수 계산
-R_squared = calculateR2(y_obs, y_pred);
-fprintf('결정계수(R^2): %.3f\n', R_squared);
-
-function R2 = calculateR2(y_obs, y_pred)
-    % y_obs : 관측된 데이터
-    % y_pred : 모델에 의해 예측된 데이터
-    
-    % 잔차 제곱합 (SSE)
-    residuals = y_obs - y_pred;
-    SSE = sum(residuals.^2, 'omitnan');
-    
-    % 총 변동 (SST)
-    mean_y_obs = mean(y_obs, 'omitnan');
-    SST = sum((y_obs - mean_y_obs).^2, 'omitnan');
-    
-    % 결정계수 (R-squared)
-    R2 = 1 - SSE/SST;
-end
-
-

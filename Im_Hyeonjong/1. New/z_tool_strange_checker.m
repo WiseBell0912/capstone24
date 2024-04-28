@@ -1,8 +1,8 @@
-%% 알고리즘 결과 확인 스크립트
+%% 알고리즘 이상치 확인 스크립트
 
 clear; close all; clc;
 
-ANN_name = 'ANN_2024_04_28_21_35';
+ANN_name = 'ANN_2024_04_23_03_48';
 
 %% radar 데이터 로드 및 처리
 
@@ -189,74 +189,17 @@ plot_bouy_Hs_interpol = interp1(plot_bouy_date, plot_bouy_Hs, plot_radar_date, '
 clearvars -except plot_radar_date plot_ANN_RESULT_FINAL plot_bouy_date plot_bouy_Hs plot_bouy_Hs_interpol ANN_name
 
 
-%% 결정 계수 도출
-y_obs = plot_bouy_Hs_interpol(76992:end);
-y_pred = plot_ANN_RESULT_FINAL(76992:end);
-residuals = y_obs - y_pred;
-SSE = sum(residuals.^2, 'omitnan');
-mean_y_obs = mean(y_obs, 'omitnan');
-SST = sum((y_obs - mean_y_obs).^2, 'omitnan');
-R_squared = 1 - SSE/SST;
+%% 이상치 탐색
 
-clear y_obs y_pred residuals SSE mean_y_obs SST
+clear strange_date
 
-
-%% 에러 그래프
-figure(2);
-set(gcf, 'position', [0 0 900 900]);
-hold on;
-
-% Radar vs Bouy
-b1 = plot(plot_ANN_RESULT_FINAL(76992:end), plot_bouy_Hs_interpol(76992:end), '.', 'MarkerSize', 0.3);
-% 비교 선
-b2 = plot([0, 10], [0, 10], 'r-');
-b2.Color(4) = 0.5;
-b3 = plot([0, 10], [-1, 9], 'r--');
-b3.Color(4) = 0.5;
-b4 = plot([0, 10], [1, 11], 'r--');
-b4.Color(4) = 0.5;
-legend('error', 'X = Y', '1m error', 'Location', 'southeast');
-% 속성
-title(['Error of ANN, R^2 = ', num2str(R_squared)], 'FontSize', 15);
-xlabel('Radar Hs [m]', 'FontSize', 13);
-ylabel('Bouy Hs [m]', 'FontSize', 13);
-% 부분만 보기
-xlim([0, 6]);
-ylim([0, 6]); 
-
-hold off;
-
-saveas(gcf, [ANN_name, '_error.png']);
-
-
-%% 비교 그래프
-% 앞 뒤 각각 30분 이동 평균, 즉 앞 뒤 각각 3점 이동 평균
-
-for year = 2019:2023
-    for month = 1 : 12
-        figure(1);
-        set(gcf, 'position', [0 0 1800 900])
-        hold on;
-
-        % Radar Hs 
-        a1 = plot(plot_radar_date, movmean(plot_ANN_RESULT_FINAL, [3 3]), 'r-', 'LineWidth', 0.5);
-        a1.Color(4) = 0.5;
-        % Bouy Hs
-        a2 = plot(plot_bouy_date, movmean(plot_bouy_Hs, [6 6]), 'b-', 'LineWidth', 0.5);
-        a2.Color(4) = 0.5;
-        % 속성
-        title('Significant Wave Height (Hs)', 'FontSize', 15);
-        xlabel('Date [mm/dd]', 'FontSize', 13);
-        ylabel('Hs [m]', 'FontSize', 13);
-        legend('RADAR', 'BOUY', 'Location', 'northeast');
-        grid on;
-        % 부분만 보기
-        xlim([datetime(year, month, 1) datetime(year, month, 31)]);
-        ylim([0, 7]);
-
-        hold off;
-
-        name = [ANN_name '_' num2str(year) '_' num2str(month) '.png'];
-        saveas(gcf,name);
+count = 0;
+for i = 1 : length(plot_radar_date)
+    if abs(plot_bouy_Hs_interpol(i) - plot_ANN_RESULT_FINAL(i)) >= 1.7
+        count = count + 1;
+        strange_date(count) = plot_radar_date(i);
     end
 end
+
+
+%%
