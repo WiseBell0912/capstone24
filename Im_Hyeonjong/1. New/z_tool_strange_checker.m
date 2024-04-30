@@ -195,11 +195,12 @@ clear strange_date
 
 count = 0;
 for i = 1 : length(plot_radar_date)
-    if abs(plot_bouy_Hs_interpol(i) - plot_ANN_RESULT_FINAL(i)) >= 1.7
+    if abs(plot_bouy_Hs_interpol(i) - plot_ANN_RESULT_FINAL(i)) > 0.3
         count = count + 1;
         strange_date(count) = plot_radar_date(i);
     end
 end
 
+strange_date = strange_date';
 
 %%

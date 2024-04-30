@@ -1,11 +1,11 @@
 load 'Grid data.mat'
 %%
-vidObj = VideoWriter([date(5:end-4)], 'Motion JPEG AVI');
+vidObj = VideoWriter('asdf', 'Motion JPEG AVI');
 vidObj.Quality = 100;
 vidObj.FrameRate = 3.14;
 open(vidObj);
 
-rdata = imread('/Users/imhyeonjong/Documents/해운대2019_png/20190111_1830.png');
+rdata = imread('C:\Users\Administrator\Desktop\PNG\AIB_20211201_1000.png');
 
  %%%%%%%%%%%%%%
     sdrng = 800; %[m]

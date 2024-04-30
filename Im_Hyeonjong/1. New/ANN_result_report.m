@@ -2,7 +2,7 @@
 
 clear; close all; clc;
 
-ANN_name = 'ANN_2024_04_28_21_35';
+ANN_name = 'ANN_2024_04_23_03_48';
 
 %% radar 데이터 로드 및 처리
 
@@ -226,7 +226,7 @@ ylim([0, 6]);
 
 hold off;
 
-saveas(gcf, [ANN_name, '_error.png']);
+%saveas(gcf, [ANN_name, '_error.png']);
 
 
 %% 비교 그래프
@@ -257,6 +257,6 @@ for year = 2019:2023
         hold off;
 
         name = [ANN_name '_' num2str(year) '_' num2str(month) '.png'];
-        saveas(gcf,name);
+        %saveas(gcf,name);
     end
 end
