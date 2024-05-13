@@ -5,14 +5,8 @@ flist = dir([pwd, '/선행연구_오찬영/p
 
 %% save result
 
-for ii = 1:1%length(flist)
-    pngname = [pwd, '/선행연구_오찬영/png/', flist(ii).name]
-    [SNR(ii), signal(ii), noise(ii), Tp(ii), Pdir(ii)] = cal1st(pngname)
-end
+pngname = [pwd, '/선행연구_오찬영/png/', flist(ii).name]
 
-save('result1st_surf.mat','SNR','signal','noise','Tp','Pdir')
-
-function [SNR, signal, noise, Tp, Pdir] = cal1st(pngname)
 
 rdata = imread(pngname);
 
@@ -251,5 +245,3 @@ Tp = 2*pi/w_ft(idx);
 idx = Sk2d_bp == max(max(Sk2d_bp));
 
 Pdir = mod((90 - rad2deg(atan2(Ky(idx),Kx(idx))) ) - rad2deg(beta) - mdeg,360);
-end
-

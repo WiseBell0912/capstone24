@@ -1,4 +1,4 @@
-clear; close all; clc;
+ clear; close all; clc;
 %% 레이다 이전 자료 전부 불러오기
 load([pwd, '/Radar/ANN_radar_out_20_3q_200905.mat']);
 % wabs : 풍속 절대값 평균 / wspd_new : 풍속 벡터 평균 / wdir_new : 풍향 벡터 평균 
