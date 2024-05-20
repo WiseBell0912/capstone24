@@ -1,12 +1,12 @@
 clear; close all; clc;
 
 
-flist = dir("D:/PNG_2107_2306/*.png"); % pngLONG
+flist = dir("/Users/imhyeonjong/Documents/POL/*.png");
 
 %% save result
 
 for ii = 1:length(flist)
-    pngname = ['D:/PNG_2107_2306/' flist(ii).name]
+    pngname = ['/Users/imhyeonjong/Documents/POL/' flist(ii).name]
     [SNR(ii), signal(ii), noise(ii), Tp(ii), Pdir(ii), date(ii)] = cal1st(pngname);
     
     disp(SNR(ii))
@@ -20,13 +20,13 @@ for ii = 1:length(flist)
     disp(datetime(t,'ConvertFrom','datenum'))
 end
 
-save([pwd, '/wave_parameter.mat'],'SNR','signal','noise','Tp','Pdir', 'date')
+%save([pwd, '/wave_parameter.mat'],'SNR','signal','noise','Tp','Pdir', 'date')
 
 function [SNR, signal, noise, Tp, Pdir, date] = cal1st(pngname)
 
 rdata = imread(pngname);
 
-date = datetime(pngname([22:34]), 'Inputformat', 'yyyyMMdd_HHmm');
+date = datetime(pngname(end-16:end-4), 'Inputformat', 'yyyyMMdd_HHmm');
 %%
 
 %%%%%%%%%%%%%%
@@ -231,7 +231,7 @@ wk1 = sqrt(g*K.*tanh(K*h)) + Kx*ux_cal + Ky*uy_cal;
 wk2 = -sqrt(g*K.*tanh(K*h)) + Kx*ux_cal + Ky*uy_cal;
 
 bpv = 2 * (Nt/32) * 2*pi/maxt; %Band pass filtering 하는 정도 / a * (dw)
-idx = ~((W > wk1 - bpv & W < wk1 + bpv) | (W > wk2 - bpv & W < wk2 + bpv));
+idx = ~( (W > wk1 - bpv & W < wk1 + bpv) | (W > wk2 - bpv & W < wk2 + bpv) );
 idx = fftshift(idx);
 
 ft(idx) = 0;
