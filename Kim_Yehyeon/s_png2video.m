@@ -5,7 +5,7 @@ vidObj.Quality = 100;
 vidObj.FrameRate = 3.14;
 open(vidObj);
 
-rdata = imread('C:\Users\Administrator\Desktop\PNG\AIB_20211201_1000.png');
+rdata = imread('C:\Users\Administrator\Desktop\testpng\AIB_20190927_0000.png');
 
  %%%%%%%%%%%%%%
     sdrng = 800; %[m]

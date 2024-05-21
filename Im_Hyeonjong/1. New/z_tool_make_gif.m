@@ -1,7 +1,7 @@
 %%
 clear; close all; clc;
 
-pngLong = imread('C:\Users\Administrator\Desktop\PNG\AIB_20211201_1000.png' );
+pngLong = imread('C:\Users\Administrator\Desktop\testpng\AIB_20190927_0000.png');
 
 %% 초기 설정
 rad_in = 800; % = 800m
@@ -23,12 +23,13 @@ arc_grid = linspace(0, 2*pi, arc_point);
 pngLong = pngLong(1 : rad_point * arc_point * time_point);
 pngLong = reshape(pngLong, rad_point, arc_point, time_point);
 pngLong = flip(pngLong, 3);
+pngLong = flip(pngLong, 2);
 
-X = R .* cos(deg2rad(119) + T);
-Y = R .* sin(deg2rad(119) + T);
+X = R .* cos(deg2rad(62) + T);
+Y = R .* sin(deg2rad(62) + T);
 
 %%
-file_list = dir('C:/Users/Administrator/Desktop/eee/*.png');
+file_list = dir('C:\Users\Administrator\Desktop\testpng\*.png');
 
 for i = 1 : length(file_list)
 
@@ -37,6 +38,7 @@ for i = 1 : length(file_list)
     pngLong = pngLong(1 : rad_point * arc_point * time_point);
     pngLong = reshape(pngLong, rad_point, arc_point, time_point);
     pngLong = flip(pngLong, 3);
+    pngLong = flip(pngLong, 2);
 
     vidObj = VideoWriter(file_list(i).name(1:17), 'Motion JPEG AVI');
     vidObj.Quality = 100;

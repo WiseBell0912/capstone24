@@ -2,15 +2,13 @@
 %clear; close all; clc;
 
 %% 레이더 이미지 확인
-path = '/Users/Administrator/Desktop/testpng/';
+path = '/Users/imhyeonjong/Documents/POL/';
 file_list = dir([path, '*.png']);
 
 %% 레이더 이미지 만큼 반복하며 해상 파라미터 추출
 for i = 1 : length(file_list)
-    png_location = [path, file_list(i).name];
+    png_location = ['/Users/imhyeonjong/Documents/POL/', file_list(i).name];
     [Date(i), surf_SNR(i), surf_Signal(i), surf_Noise(i), surf_Tp(i), wave_SNR(i), wave_Signal(i), wave_Noise(i), wave_Tp(i), wave_Pdir(i)] = cal_wave_para(png_location);
-
-    disp(i); disp('/'); disp(length(file_list));
 end
 
 %% 추출한 해상 파라미터 저장

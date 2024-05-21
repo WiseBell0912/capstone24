@@ -1,12 +1,12 @@
 clear; close all; clc;
 
 
-flist = dir("/Users/imhyeonjong/Documents/POL/*.png");
+flist = dir("/Users/Administrator/Desktop/testpng/*.png");
 
 %% save result
 
 for ii = 1:length(flist)
-    pngname = ['/Users/imhyeonjong/Documents/POL/' flist(ii).name]
+    pngname = ['/Users/Administrator/Desktop/testpng/' flist(ii).name]
     [SNR(ii), signal(ii), noise(ii), Tp(ii), Pdir(ii), date(ii)] = cal1st(pngname);
     
     disp(SNR(ii))
