@@ -2,7 +2,7 @@
 %clear; close all; clc;
 
 %% 레이더 이미지 확인
-path = '/Users/Administrator/Desktop/testpng/';
+path = '/Users/imhyeonjong/Documents/POL/';
 file_list = dir([path, '*.png']);
 
 %% 레이더 이미지 만큼 반복하며 해상 파라미터 추출
@@ -153,7 +153,7 @@ Lx = 630;
 Ly = 360;
 Lt = dt * Nt;
 
-h = 30;
+h = 15;
 g = 9.81;
 
 %% Image normalization

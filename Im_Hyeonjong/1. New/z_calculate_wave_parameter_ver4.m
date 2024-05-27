@@ -1,8 +1,21 @@
 %% wave parameter를 구하기 위해 이미지 자르는 스크립트
 clear; close all; clc;
 
+%% 반복하여 이미지 불러오기
+path = '/Users/imhyeonjong/Documents/POL/';
+file_list = dir([path, '*.png']);
+
+for i = 1 : length(file_list)
+    png_location = [path, file_list(i).name];
+    dummy = checker(png_location);
+end
+
+
+function result = checker(pngname)
+
+result = 1;
+
 %% pngLong 불러오기
-pngname = '/Users/imhyeonjong/Documents/POL/AIB_20200101_0000.png';
 rdata = imread(pngname);
 
 %% date 저장
@@ -37,13 +50,14 @@ rdata = flip(rdata,2);
 
 %% 출력 확인
 figure(1);
-tiledlayout(1,2);
+tiledlayout(1,3);
 nexttile;
 set(gcf,'position', [800 500 1600 1000]);
 k = surf(X, Y, rdata(:, :, 1), 'EdgeAlpha', 0);
 axis equal; axis([-2336 2336 -2336 2336]); 
 view(0,90); 
 clim([0 200]);
+title([pngname(end-16:end-13) '/' pngname(end-12:end-11) '/' pngname(end-10:end-9) '/' pngname(end-7:end-6) ':' pngname(end-5:end-4)], 'FontSize', 20);
 hold on;
 %k.FaceAlpha = 0.5;
 %I = imread([pwd '/check1.png']); 
@@ -153,13 +167,26 @@ for ii = 1:1
     
 end
 
+%% 출력 확인
 nexttile;
-surf(Yc, Xc, img_cut_wave(:, :, 1), 'EdgeAlpha', 0);
+surf(img_cut_wave(:, :, 1)', 'EdgeAlpha', 0);
 clim([0 200]);
 set(gcf,'position', [800 500 1600 1000]);
-axis equal; axis([-2336 2336 -2336 2336]); 
+axis equal; axis([0 121 0 211]); 
 view(0,90);
-hold on;
-surf(Yc_1, Xc_1, img_cut_surf(:, :, 1), 'EdgeAlpha', 0);
+title("Wave Box", 'FontSize', 20);
+
+nexttile;
+surf(img_cut_surf(:, :, 1)', 'EdgeAlpha', 0);
 clim([0 200]);
+set(gcf,'position', [800 500 1600 1000]);
+axis equal; axis([0 121 0 211]); 
+view(0,90);
+title("Surf Box", 'FontSize', 20);
+
+%% Figure 저장
+name = ['check ' pngname(end-16:end)];
+saveas(gcf, name);
+
+end
 
