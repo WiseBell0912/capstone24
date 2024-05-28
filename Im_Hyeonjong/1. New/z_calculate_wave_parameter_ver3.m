@@ -1,14 +1,15 @@
 %% 해상 파라미터를 추출하는 스크립트
-%clear; close all; clc;
+clear; close all; clc;
 
 %% 레이더 이미지 확인
-path = '/Users/imhyeonjong/Documents/POL/';
+path = 'C:\Users\Administrator\Desktop\png_2019_10\';
 file_list = dir([path, '*.png']);
 
 %% 레이더 이미지 만큼 반복하며 해상 파라미터 추출
+for j = 30 : 30
 for i = 1 : length(file_list)
     png_location = [path, file_list(i).name];
-    [Date(i), surf_SNR(i), surf_Signal(i), surf_Noise(i), surf_Tp(i), wave_SNR(i), wave_Signal(i), wave_Noise(i), wave_Tp(i), wave_Pdir(i)] = cal_wave_para(png_location);
+    [Date(i), surf_SNR(i), surf_Signal(i), surf_Noise(i), surf_Tp(i), wave_SNR(i), wave_Signal(i), wave_Noise(i), wave_Tp(i), wave_Pdir(i)] = cal_wave_para(png_location, j);
 
     disp(i); disp('/'); disp(length(file_list));
 end
@@ -16,8 +17,29 @@ end
 %% 추출한 해상 파라미터 저장
 %save();
 
+%% 실험 24.4485
+close all;
+
+name = ['BP8-h', num2str(j), '-Pdir.png'];
+
+load check1.mat;
+figure(1);
+hold on;
+plot(ADCP.time, ADCP.VarName3);
+plot(Date, wave_Tp);
+plot(Date, surf_Tp);
+title(name);
+legend('ADCP', 'WAVE', 'SURF');
+ylim([0 15]);
+%day = 1;
+%xlim([datetime(2019, 10, day) datetime(2019, 10, day+10)]);
+
+saveas(gcf, name);
+%saveas(gcf, name);
+
+end
 %% 해상 파라미터 추출 함수
-function [Date, surf_SNR, surf_Signal, surf_Noise, surf_Tp, wave_SNR, wave_Signal, wave_Noise, wave_Tp, wave_Pdir] = cal_wave_para(png_location)
+function [Date, surf_SNR, surf_Signal, surf_Noise, surf_Tp, wave_SNR, wave_Signal, wave_Noise, wave_Tp, wave_Pdir] = cal_wave_para(png_location, h)
 
 % 레이더 이미지 불러오기
 %png_location = ['/Users/imhyeonjong/Documents/POL/', file_list(1).name];
@@ -153,7 +175,7 @@ Lx = 630;
 Ly = 360;
 Lt = dt * Nt;
 
-h = 15;
+%h = 15;
 g = 9.81;
 
 %% Image normalization
@@ -287,10 +309,10 @@ surf_Tp = 2*pi / abs(w(idx_surf));
 wave_Tp = 2*pi / abs(w(idx_wave));
 
 %% Wave direction
-wave_directional_spectrum = sum(wave_power, 3);
+wave_directional_spectrum = sum(wave_power(end/2:end), 3);
 
 [dummy, idx_wave] = max(wave_directional_spectrum, [], 'all');
 
-wave_Pdir = mod( rad2deg(atan(K(idx_wave))) - box_deg , 360);
+wave_Pdir = mod( rad2deg(atan2(Ky(idx_wave), Kx(idx_wave))) - box_deg , 360);
 
 end

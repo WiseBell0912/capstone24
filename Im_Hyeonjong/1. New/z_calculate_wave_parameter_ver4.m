@@ -2,12 +2,14 @@
 clear; close all; clc;
 
 %% 반복하여 이미지 불러오기
-path = '/Users/imhyeonjong/Documents/POL/';
+path = 'E:/png2019/';
 file_list = dir([path, '*.png']);
 
 for i = 1 : length(file_list)
-    png_location = [path, file_list(i).name];
-    dummy = checker(png_location);
+    if file_list(i).name(16) == '0' && file_list(i).name(9) == '1' && file_list(i).name(10) == '0'
+        png_location = [path, file_list(i).name];
+        dummy = checker(png_location);
+    end
 end
 
 
@@ -185,7 +187,7 @@ view(0,90);
 title("Surf Box", 'FontSize', 20);
 
 %% Figure 저장
-name = ['check ' pngname(end-16:end)];
+name = ['check-' pngname(end-16:end)];
 saveas(gcf, name);
 
 end
